@@ -1,84 +1,1060 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Joel</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <title>Advistane</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
-  <style type="text/css">
-    html,
-    body {
-      background: transparent;
-      margin: 0;
-      padding: 0;
-      font-family: sans-serif;
-    }
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    #overlay-container {
-      width: 960px;
-      height: 540px;
-    }
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: transparent;
+            font-family: Arial, Helvetica, sans-serif;
+        }
 
-    /* Your style here... (feel free to remove this example styling) */
-    #skip {
-      display: none; /* Hidden until ad starts */
-      position: absolute;
-      bottom: 60px;
-      right: 0;
-      padding: 10px 18px;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid black;
-      border-right-width: 0;
-      font-size: 1.2rem;
-      border-radius: 4px 0 0 4px;
-      color: white;
-      cursor: pointer;
-    }
-  </style>
+        #overlay-container {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            color: #172033;
+            background: linear-gradient(rgba(12, 18, 28, 0.42), rgba(12, 18, 28, 0.42)),
+            repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 14px);
+        }
+
+        #overlay-container.visible {
+            display: flex;
+        }
+
+        .modal-shell {
+            width: min(850px, 100%);
+            max-height: 506px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f8fafc;
+            border: 1px solid rgba(15, 23, 42, 0.28);
+            border-radius: 8px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: #16a34a;
+            box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.16);
+            animation: pulse-dot 1.2s ease-in-out infinite;
+        }
+
+        .meter-fill {
+            width: 0%;
+            transition: width 0.22s linear;
+        }
+
+        .metric-chart {
+            height: 48px;
+            width: 100%;
+            display: block;
+        }
+
+        .metric-chart polyline {
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.12));
+        }
+
+        .server-card.active {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .stream-box {
+            height: 132px;
+            overflow-y: auto;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+        }
+
+        .stream-box .word {
+            display: block;
+            font-size: 13px;
+            animation: word-pop 0.16s ease-out;
+        }
+
+        .stream-box .loading-line {
+            display: block;
+            margin: 3px 0;
+            color: #64748b;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .fake-spinner {
+            width: 42px;
+            height: 42px;
+            border: 4px solid #dbeafe;
+            border-top-color: #2563eb;
+            border-radius: 999px;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% {
+                opacity: 0.45;
+                transform: scale(0.9);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.08);
+            }
+        }
+
+        @keyframes word-pop {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+    </style>
 </head>
 
 <body>
-  <div id="overlay-container">
-    <!-- We've added a sample button. Feel free to remove it: -->
-    <button id="skip">
-      Skip Ad...
-    </button>
-  </div>
+<div id="overlay-container" aria-live="polite">
+    <section class="modal-shell">
+        <header class="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
+            <div class="flex items-center gap-3">
+                <div class="status-dot"></div>
 
-  <script type="text/javascript">
-    (function(window, document){
-      // This is how you tell the parent window that the ad was successfully skipped.
-      function adSuccess() {
-        window.top.postMessage({ type: 'success' }, '*');
-      }
+                <div>
+                    <div class="text-sm font-semibold text-slate-900">Ad Delivery Optimization</div>
 
-      const skipButton = document.getElementById('skip');
+                    <div class="text-xs text-slate-500">
+                        Secure CDN selection required before playback can continue. Provided by the WWWWTSACTP.
+                    </div>
+                </div>
+            </div>
 
-      // Listen for messages from the game shell
-      window.addEventListener('message', (event) => {
+            <div class="rounded border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-500">
+                LIVE
+            </div>
+        </header>
+
+        <main class="min-h-0 flex-1 overflow-hidden p-5">
+            <section id="intro-panel">
+                <div class="rounded-md border border-slate-200 bg-white p-5">
+                    <h1 class="text-xl font-semibold text-slate-950">Finding nearest ad server</h1>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        In order to provide you the best ad experience, we need to find the ad server closest to you.
+                        This will take just a moment.
+                    </p>
+
+                    <div class="mt-5 rounded border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500">
+                        This temporary calibration helps select the most compatible sponsored content delivery route.
+                    </div>
+
+                    <div class="mt-5 flex justify-end">
+                        <button
+                            id="begin-test"
+                            class="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="auto-panel" class="hidden">
+                <div class="mb-4">
+                    <h1 id="auto-title" class="text-xl font-semibold text-slate-950">
+                        Finding nearest ad server
+                    </h1>
+
+                    <p id="auto-copy" class="mt-1 text-sm text-slate-600">
+                        In order to provide you the best ad experience, we need to find the ad server closest to you.
+                        This will take just a moment.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-[1fr_1.1fr] gap-4">
+                    <div class="rounded-md border border-slate-200 bg-white p-4">
+                        <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Detected location
+                        </div>
+
+                        <div id="detected-location" class="mt-2 text-lg font-semibold text-slate-950">
+                            Calculating...
+                        </div>
+
+                        <div id="location-confidence" class="mt-1 text-xs text-slate-500">Confidence pending</div>
+
+                        <div class="mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500">Current test
+                            target
+                        </div>
+
+                        <div id="server-name" class="mt-2 text-base font-semibold text-slate-900">Waiting for route
+                            lock
+                        </div>
+
+                        <div id="server-region" class="text-sm text-slate-500">Anycast discovery</div>
+
+                        <div class="mt-5 grid grid-cols-3 gap-2 text-center">
+                            <div class="rounded border border-slate-200 bg-slate-50 p-2">
+                                <div id="ping-stat" class="text-lg font-semibold text-slate-950">--</div>
+
+                                <div class="text-[11px] text-slate-500">ping</div>
+                            </div>
+
+                            <div class="rounded border border-slate-200 bg-slate-50 p-2">
+                                <div id="jitter-stat" class="text-lg font-semibold text-slate-950">--</div>
+                                <div class="text-[11px] text-slate-500">jitter</div>
+                            </div>
+
+                            <div class="rounded border border-slate-200 bg-slate-50 p-2">
+                                <div id="loss-stat" class="text-lg font-semibold text-slate-950">--</div>
+                                <div class="text-[11px] text-slate-500">loss</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-md border border-slate-200 bg-white p-4">
+                        <div class="flex items-center justify-between">
+                            <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Throughput test
+                            </div>
+
+                            <div id="test-timer" class="text-xs font-semibold text-slate-500">00:30 remaining</div>
+                        </div>
+
+                        <div class="mt-3 h-3 overflow-hidden rounded-full bg-slate-200">
+                            <div id="meter-fill" class="meter-fill h-full rounded-full bg-blue-600"></div>
+                        </div>
+
+                        <div class="mt-4 grid grid-cols-2 gap-3">
+                            <div class="rounded border border-slate-200 bg-slate-50 p-3">
+                                <div class="text-xs text-slate-500">Download</div>
+
+                                <div id="download-stat" class="mt-1 text-2xl font-semibold text-slate-950">
+                                    0.00 Mbps
+                                </div>
+                            </div>
+
+                            <div class="rounded border border-slate-200 bg-slate-50 p-3">
+                                <div class="text-xs text-slate-500">Ad preroll burst</div>
+
+                                <div id="burst-stat" class="mt-1 text-2xl font-semibold text-slate-950">0 kb</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid grid-cols-3 gap-2">
+                            <div class="rounded border border-slate-200 bg-slate-50 p-2">
+                                <div class="mb-1 text-[11px] font-semibold text-slate-500">Mbps</div>
+
+                                <svg class="metric-chart" viewBox="0 0 120 48" preserveAspectRatio="none">
+                                    <polyline id="speed-chart" stroke="#2563eb" points="" />
+                                </svg>
+                            </div>
+                            <div class="rounded border border-slate-200 bg-slate-50 p-2">
+                                <div class="mb-1 text-[11px] font-semibold text-slate-500">Ping</div>
+
+                                <svg class="metric-chart" viewBox="0 0 120 48" preserveAspectRatio="none">
+                                    <polyline id="ping-chart" stroke="#7c3aed" points="" />
+                                </svg>
+                            </div>
+                            <div class="rounded border border-slate-200 bg-slate-50 p-2">
+                                <div class="mb-1 text-[11px] font-semibold text-slate-500">Loss</div>
+
+                                <svg class="metric-chart" viewBox="0 0 120 48" preserveAspectRatio="none">
+                                    <polyline id="loss-chart" stroke="#dc2626" points="" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-4 rounded border border-slate-200 bg-slate-950 p-3 font-mono text-xs text-emerald-300">
+                            <div id="log-line-1">Waiting for nearest edge handshake...</div>
+                            <div id="log-line-2" class="mt-1 text-emerald-400/80">QoE probe queued.</div>
+                            <div id="log-line-3" class="mt-1 text-emerald-400/70">Please do not close this window.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="manual-intro-panel" class="hidden">
+                <div class="rounded-md border border-slate-200 bg-white p-5">
+                    <h1 class="text-xl font-semibold text-slate-950">The results were too close to call</h1>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        We will do a quick manual test. You will see words streaming from each server. Please select the
+                        stream that delivered the historical literature quickest.
+                    </p>
+
+                    <div class="mt-5 rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                        All streams must finish before the fastest delivery route can be selected.
+                    </div>
+
+                    <div class="mt-5 flex justify-end">
+                        <button
+                            id="begin-manual-test"
+                            class="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                            Begin manual test
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="manual-panel" class="hidden">
+                <div class="mb-3">
+                    <h1 class="text-xl font-semibold text-slate-950">Manual CDN verification required</h1>
+
+                    <p id="manual-copy" class="mt-1 text-sm text-slate-600">
+                        We will stream one word at a time from each server. Please select which piece of historical literature was streamed in entirety quickest.
+                    </p>
+                </div>
+
+                <div id="stream-grid" class="grid grid-cols-3 gap-3"></div>
+
+                <div class="mt-4 flex items-center gap-3 rounded-md border border-slate-200 bg-white p-3">
+                    <label for="answer-select" class="text-sm font-semibold text-slate-700">Fastest stream</label>
+
+                    <select
+                        id="answer-select"
+                        disabled
+                        class="min-w-0 flex-1 rounded border border-slate-300 bg-slate-100 px-3 py-2 text-sm text-slate-900"
+                    >
+                        <option value="">Waiting for all streams to finish...</option>
+                    </select>
+
+                    <button
+                        id="submit-answer"
+                        disabled
+                        class="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                    >
+                        Confirm
+                    </button>
+                </div>
+
+                <div id="manual-error" class="mt-2 min-h-5 text-sm font-semibold text-red-600"></div>
+            </section>
+
+            <section id="cdn-confirmed-panel" class="hidden">
+                <div class="rounded-md border border-slate-200 bg-white p-5">
+                    <h1 class="text-xl font-semibold text-slate-950">CDN Confirmed</h1>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        Your manual route selection has been verified. Would you like to skip the ad?
+                    </p>
+
+                    <div class="mt-5 flex justify-end gap-2">
+                        <button
+                            id="skip-confirm-yes"
+                            class="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                            Yes, skip ad
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="skip-loading-panel" class="hidden">
+                <div class="rounded-md border border-slate-200 bg-white p-6 text-center">
+                    <div class="mx-auto fake-spinner"></div>
+                    <h1 class="mt-4 text-xl font-semibold text-slate-950">Generating skip code</h1>
+                    <p id="skip-loading-copy" class="mt-2 text-sm leading-6 text-slate-600">
+                        Please wait while a one-time keyboard skip code is generated.
+                    </p>
+                </div>
+            </section>
+
+            <section id="recorded-panel" class="hidden">
+                <div class="rounded-md border border-amber-200 bg-amber-50 p-5">
+                    <div class="text-xs font-semibold uppercase tracking-wide text-amber-700">Alert</div>
+
+                    <h1 class="mt-2 text-xl font-semibold text-slate-950">Your response has been recorded.</h1>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-700">
+                        To skip immediately, press this generated skip code on your keyboard:
+                    </p>
+
+                    <div class="mt-4 rounded border border-amber-300 bg-white p-3 font-mono text-sm font-semibold text-slate-950">
+                        ↑ ↑ ↓ ↓ ← → ← → B A Start
+                    </div>
+
+                    <p id="skip-code-progress" class="mt-3 text-sm font-semibold text-amber-800">
+                        Closing in 5...
+                    </p>
+
+                    <p class="mt-2 text-xs leading-5 text-slate-600">
+                        Start is mapped to Enter. The code remains active after this alert closes.
+                    </p>
+                </div>
+            </section>
+        </main>
+    </section>
+</div>
+
+<script>
+    // Each fake automatic speed test lasts somewhere inside this range.
+    const MIN_TEST_DURATION_MS = 30000;
+    const MAX_TEST_DURATION_MS = 55000;
+
+    // How many recent samples are drawn in each tiny metric chart during the speedtest.
+    const CHART_POINTS = 34;
+
+    // How far apart the three manual streams should finish (before the jitter below)
+    const MANUAL_FINISH_SPREAD_MS = 1200;
+
+    // Small extra randomness so the manual streams do not finish identically.
+    const MANUAL_FINISH_JITTER_MS = 120;
+
+    const SCRIPTS = [
+        {
+            "name": "Bee Movie",
+            "text": "According to all known laws of aviation, there is no way a bee should be able to fly.. Its wings are too small to get its fat little body off the ground.. The bee, of course, flies anyway because bees don't care what humans think is impossible.. Yellow, black. Yellow, black. Yellow, black. Yellow, black.. Ooh, black and yellow!. Let's shake it up a little.. Barry! Breakfast is ready!. Coming!. Hang on a second.. Hello?. Barry?. Adam?. Can you believe this is happening?. I can't.. I'll pick you up.. Looking sharp.. Use the stairs, Your father paid good money for those.. Sorry. I'm excited.. Here's the graduate.. We're very proud of you, son.. A perfect report card, all B's.. Very proud.. Ma! I got a thing going here.. You got lint on your fuzz.. Ow! That's me!. Wave to us! We'll be in row 118,000.. Bye!. Barry, I told you, stop flying in the house!. Hey, Adam.. Hey, Barry.. Is that fuzz gel?. A little. Special day, graduation.. Never thought I'd make it.. Three days grade school, three days high school.. Those were awkward.. Three days college. I'm glad I took a day and hitchhiked around The Hive.. You did come back different.. Hi, Barry. Artie, growing a mustache? Looks good.. Hear about Frankie?. Yeah.. You going to the funeral?. No, I'm not going.. Everybody knows, sting someone, you die.. Don't waste it on a squirrel.. Such a hothead.. I guess he could have just gotten out of the way.. I love this incorporating an amusement park into our day.. That's why we don't need vacations.. Boy, quite a bit of pomp under the circumstances.. Well, Adam, today we are men.. We are!. Bee-men.. Amen!. Hallelujah!. Students, faculty, distinguished bees,. please welcome Dean Buzzwell.. Welcome, New Hive City graduating class of 9:15.. That concludes our ceremonies And begins your career at Honex Industries!. Will we pick our job today?. I heard it's just orientation.. Heads up! Here we go.. Keep your hands and antennas inside the tram at all times.. Wonder what it'll be like?. A little scary.. Welcome to Honex, a division of Honesco and a part of the Hexagon Group.. This is it!. Wow.. Wow.. We know that you, as a bee, have worked your whole life to get to the point where you can work for your whole life.. Honey begins when our valiant Pollen Jocks bring the nectar to The Hive.. Our top-secret formula is automatically color-corrected, scent-adjusted and bubble-contoured into this soothing sweet syrup with its distinctive golden glow you know as... Honey!. That girl was hot.. She's my cousin!. She is?. Yes, we're all cousins.. Right. You're right."
+        },
+        {
+            "name": "All Star",
+            "text": "Somebody once told me the world is gonna roll me. I ain't the sharpest tool in the shed. She was looking kind of dumb with her finger and her thumb. In the shape of an \"L\" on her forehead. Well, the years start comin' and they don't stop comin'. Fed to the rules and I hit the ground runnin'. Didn't make sense not to live for fun. Your brain gets smart, but your head gets dumb. So much to do, so much to see. So, what's wrong with taking the backstreets?. You'll never know if you don't go (go). You'll never shine if you don't glow. Hey now, you're an all-star. Get your game on, go play. Hey now, you're a rock star. Get the show on, get paid. (And all that glitters is gold). Only shootin' stars break the mold. It's a cool place, and they say it gets colder. You're bundled up now, wait 'til you get older. But the meteor men beg to differ. Judging by the hole in the satellite picture. The ice we skate is gettin' pretty thin. The water's gettin' warm, so you might as well swim. My world's on fire, how 'bout yours?. That's the way I like it, and I'll never get bored. Hey now, you're an all-star. Get your game on, go play. Hey now, you're a rock star. Get the show on, get paid. (All that glitters is gold). Only shootin' stars break the mold. Go for the moon. (Go, go, go) go for the moon. (Go, go, go) go for the moon. Go (go), go for the moon. Hey now, you're an all-star. Get your game on, go play. Hey now, you're a rock star. Get the show on, get paid. (And all that glitters is gold). Only shooting stars. Somebody once asked, \"Could I spare some change for gas?. I need to get myself away from this place\". I said, \"Yep, what a concept, I could use a little fuel myself. And we could all use a little change\". Well, the years start comin' and they don't stop comin'. Fed to the rules and I hit the ground runnin'. Didn't make sense not to live for fun. Your brain gets smart, but your head gets dumb. So much to do, so much to see. So, what's wrong with taking the backstreets?. You'll never know if you don't go (go!). You'll never shine if you don't glow. Hey now, you're an all-star. Get your game on, go play. Hey now, you're a rock star. Get the show on, get paid. (And all that glitters is gold). Only shootin' stars break the mold. Only shootin' stars break the mold"
+        },
+        {
+            "name": "Sandstorm",
+            "text": "Duuuuuuuuuuuuuuuuuuuuuuun. Dun dun dun dun dun dun dun dun dun dun dun dundun dun dundundun dun dun dun dun dun dun dundun dundun. BOOM. Dundun dundun dundun. BEEP. Dun dun dun dun dun. Dun dun. BEEP BEEP BEEP BEEP. BEEEP BEEP BEEP BEEP. BEEP BEEP BEEP BEEP BEEP BEEP BEEP BEEP BEEP BEEP BOOM. Daddaddadaddadadadadadadadadadaddadadadadadaddadadaddadadadadadadadadadadadaddadddadaddadadadd dadadadaddaddada. D. Dadadddaddadaddadadadddadadada. Nyu nyu nyu nyu nyu nnyu nyu nyu nyu nyu nyu nyu nyu nyu nyu nyu. Doo doo doo doo doo doo doo doo. Nnn nn nn nn nn nn n nn nnn nn nn nnn nnn nnnnnnnn. Dddddddd ddadadadadaddadadadadadaadadadadadad. BOOM. Nyu nyu nyu nyu nyu nyu. BOOM. BOOM BOOM BOOM BOOM. BOOM. Nyunyunyu nyu nyu nyu nyu nyu nyu nyu nyu nyu nyu. BOOM BOOM. BEEP BEEP. BEEP BEEP BEEP. Dadadadadada. Ddadad. BOOM BOOM. BEEP BEEP. BEEP BEEP BEEP BEEP BEEP BEEP BEEP BEEP BEEP BEEP BEEP BEEP BEEP BEEP BEEP. BOOM. (Unintelligible). Ddudndundun dun dun dun dun dun dun dun dun dun dun dun dun dun dun dund. Dododododododododododododododododododododododododododododoodo. DRUM DRUM DRUM. Ddodododododoododododododododoodododododododo. Chi chichi chi chi chih. BOOOM. Chcihcihfkdhfdisjfkla. Dodododododododododododododododododododododododododododododododododoo. SCHEW. Dododododododoodododododododododododododo. Dadadadddudndundundudnudndundundunddunfudnundudnudnudndund. BOOM. FADE"
+        },
+        {
+            "name": "Albuquerque",
+            "text": "Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. Albequerque, New Mexico. "
+        },
+        {
+            "name": "Richard's Song (To the Bay)",
+            "text": "Do you mind if I play this song for you, on the casette player Yes, yes yes please, please  When I look out on the ocean skies Sometimes I see the fish going by But I never knew what I meant to you today  Sometimes I know that the fish are so blue I hope that I can be there for you And when I look out there and I see all that could be that There once was that thing for me  And if I could ever hold your hand I would hold it I would hold your hand and I would take it all the way down To the bay with you  With you With you Such a beautiful voice That is beautiful ma'am, that's really good With you Oh"
+        },
+        {
+            "name": "We are Number One",
+            "text": "Hey! We are Number One Hey! We are Number One Now listen closely Here's a little lesson in trickery This is going down in history If you wanna be a Villain Number One You have to chase a superhero on the run Just follow my moves, and sneak around Be careful not to make a sound (Shh) (No, don't touch that!) We are Number One Hey! We are Number One We are Number One Ha ha ha Now look at this net, that I just found When I say go, be ready to throw Go! (Throw it on him, not me!) (Ugh, let's try something else) Now watch and learn, here's the deal He'll slip and slide on this banana peel! (Ha ha ha, gasp! what are you doing!?) Ba-ba-biddly-ba-ba-ba-ba, ba-ba-ba-ba-ba-ba-ba We are Number One Hey! Ba-ba-biddly-ba-ba-ba-ba, ba-ba-ba-ba-ba-ba-ba We are Number One Ba-ba-biddly-ba-ba-ba-ba, ba-ba-ba-ba-ba-ba-ba We are Number One Hey! Ba-ba-biddly-ba-ba-ba-ba, ba-ba-ba-ba-ba-ba-ba We are Number One Hey! Hey!"
+        }
+    ]
+
+    const locations = [
+        'Wichita, KS', 'Olmsted Falls, OH', 'Plano, TX', 'Fresno, CA', 'Duluth, MN',
+        'Fort Wayne, IN', 'Reno, NV', 'Roswell, NM', 'Boise, ID', 'Scranton, PA', 'Albuquerque, NM'
+    ];
+
+    const servers = [
+        {name: 'AdEdge-17', region: 'Council Bluffs, IA'},
+        {name: 'PrerollCache-04', region: 'Secaucus, NJ'},
+        {name: 'SponsorMux-22', region: 'Tukwila, WA'},
+        {name: 'CreativeCDN-09', region: 'Ashburn, VA'},
+        {name: 'BeaconFill-31', region: 'Richardson, TX'},
+        {name: 'OverlayRoute-06', region: 'Elk Grove Village, IL'}
+    ];
+
+    const kitbogaStatusMessages = [
+        'Checking Google Play redeem speed.',
+        'Locating nearest Bitcoin ATM.',
+        'Verifying refund department hold music latency.',
+        'Measuring gift card scratch-off throughput.',
+        'Pinging secure AnyDesk supervision node.',
+        'Testing Western Union packet confidence.',
+        'Auditing Microsoft support callback route.',
+        'Calibrating bank manager approval channel.',
+        'Checking if the money is in the computer.'
+    ];
+
+    const decoyAnswers = [
+        'Terms and Conditions',
+        'Privacy Policy',
+        'Ad Choices Disclosure',
+        'Buffering Notice',
+        'Creative Asset Manifest',
+        'Sponsored Message',
+        'Network Handshake',
+        'Route Optimization Report'
+    ];
+
+    const overlay = document.getElementById('overlay-container');
+    const introPanel = document.getElementById('intro-panel');
+    const autoPanel = document.getElementById('auto-panel');
+    const manualIntroPanel = document.getElementById('manual-intro-panel');
+    const manualPanel = document.getElementById('manual-panel');
+    const cdnConfirmedPanel = document.getElementById('cdn-confirmed-panel');
+    const skipLoadingPanel = document.getElementById('skip-loading-panel');
+    const recordedPanel = document.getElementById('recorded-panel');
+    const beginTest = document.getElementById('begin-test');
+    const beginManualTest = document.getElementById('begin-manual-test');
+    const skipConfirmYes = document.getElementById('skip-confirm-yes');
+    const skipLoadingCopy = document.getElementById('skip-loading-copy');
+    const skipCodeProgress = document.getElementById('skip-code-progress');
+    const autoTitle = document.getElementById('auto-title');
+    const autoCopy = document.getElementById('auto-copy');
+    const detectedLocation = document.getElementById('detected-location');
+    const locationConfidence = document.getElementById('location-confidence');
+    const serverName = document.getElementById('server-name');
+    const serverRegion = document.getElementById('server-region');
+    const pingStat = document.getElementById('ping-stat');
+    const jitterStat = document.getElementById('jitter-stat');
+    const lossStat = document.getElementById('loss-stat');
+    const testTimer = document.getElementById('test-timer');
+    const meterFill = document.getElementById('meter-fill');
+    const downloadStat = document.getElementById('download-stat');
+    const burstStat = document.getElementById('burst-stat');
+    const speedChart = document.getElementById('speed-chart');
+    const pingChart = document.getElementById('ping-chart');
+    const lossChart = document.getElementById('loss-chart');
+    const logLine1 = document.getElementById('log-line-1');
+    const logLine2 = document.getElementById('log-line-2');
+    const logLine3 = document.getElementById('log-line-3');
+    const streamGrid = document.getElementById('stream-grid');
+    const answerSelect = document.getElementById('answer-select');
+    const submitAnswer = document.getElementById('submit-answer');
+    const manualError = document.getElementById('manual-error');
+
+    let flowStarted = false;
+    let skipCodeActive = false;
+    let skipCodeIndex = 0;
+    let activeTimers = [];
+    let fastestScriptName = '';
+    let activeStatusMessage = '';
+    let chartHistory = {
+        speed: [],
+        ping: [],
+        loss: []
+    };
+
+    const skipCodeSequence = [
+        'ArrowUp',
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowDown',
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowLeft',
+        'ArrowRight',
+        'KeyB',
+        'KeyA',
+        'Enter'
+    ];
+
+    function sendToParent(type, value) {
+        window.top.postMessage(value === undefined ? {type} : {type, value}, '*');
+    }
+
+    function adSuccess() {
+        sendToParent('setVideoFilter', 'none');
+        sendToParent('play');
+        sendToParent('success');
+    }
+
+    function pick(list) {
+        return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function pickDifferent(list, current) {
+        if (list.length < 2) return pick(list);
+
+        let next = pick(list);
+        while (next === current) {
+            next = pick(list);
+        }
+        return next;
+    }
+
+    function shuffle(list) {
+        const copy = list.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    function setTimer(callback, delay) {
+        const id = window.setTimeout(callback, delay);
+        activeTimers.push({type: 'timeout', id});
+        return id;
+    }
+
+    function setTicker(callback, delay) {
+        const id = window.setInterval(callback, delay);
+        activeTimers.push({type: 'interval', id});
+        return id;
+    }
+
+    function clearTimers() {
+        activeTimers.forEach(timer => {
+            if (timer.type === 'timeout') window.clearTimeout(timer.id);
+            if (timer.type === 'interval') window.clearInterval(timer.id);
+        });
+        activeTimers = [];
+    }
+
+    function formatRemaining(ms) {
+        const seconds = Math.max(0, Math.ceil(ms / 1000));
+        return '00:' + String(seconds).padStart(2, '0') + ' remaining';
+    }
+
+    function randomTestDuration() {
+        return MIN_TEST_DURATION_MS + Math.floor(Math.random() * (MAX_TEST_DURATION_MS - MIN_TEST_DURATION_MS + 1));
+    }
+
+    function showPanel(panel) {
+        [
+            introPanel,
+            autoPanel,
+            manualIntroPanel,
+            manualPanel,
+            cdnConfirmedPanel,
+            skipLoadingPanel,
+            recordedPanel
+        ].forEach((candidate) => {
+            candidate.classList.toggle('hidden', candidate !== panel);
+        });
+    }
+
+    function resetMetricCharts() {
+        chartHistory = {speed: [], ping: [], loss: []};
+        speedChart.setAttribute('points', '');
+        pingChart.setAttribute('points', '');
+        lossChart.setAttribute('points', '');
+    }
+
+    function chartPoints(values, maxValue) {
+        if (values.length === 0) return '';
+
+        return values.map((value, index) => {
+            const x = values.length === 1 ? 0 : (index / (values.length - 1)) * 120;
+            const normalized = Math.min(1, Math.max(0, value / maxValue));
+            const y = 46 - normalized * 42;
+            return x.toFixed(1) + ',' + y.toFixed(1);
+        }).join(' ');
+    }
+
+    function updateMetricCharts(speed, ping, loss) {
+        chartHistory.speed.push(speed);
+        chartHistory.ping.push(ping);
+        chartHistory.loss.push(loss);
+
+        Object.keys(chartHistory).forEach(key => {
+            if (chartHistory[key].length > CHART_POINTS) {
+                chartHistory[key].shift();
+            }
+        });
+
+        speedChart.setAttribute('points', chartPoints(chartHistory.speed, 110));
+        pingChart.setAttribute('points', chartPoints(chartHistory.ping, 220));
+        lossChart.setAttribute('points', chartPoints(chartHistory.loss, 3));
+    }
+
+    function startFlow() {
+        flowStarted = true;
+        sendToParent('pause');
+        sendToParent('setVideoFilter', 'brightness(0.78) saturate(0.85)');
+        overlay.classList.add('visible');
+        showPanel(introPanel);
+    }
+
+    function startAutomaticProcess() {
+        clearTimers();
+        showPanel(autoPanel);
+        autoTitle.textContent = 'Finding nearest ad server';
+        autoCopy.textContent = 'In order to provide you the best ad experience, we need to find the ad server closest to you. This will take just a moment.';
+        detectedLocation.textContent = pick(locations);
+        locationConfidence.textContent = Math.floor(72 + Math.random() * 23) + '% confidence based on ad telemetry';
+        runServerTest(0, shuffle(servers).slice(0, 3));
+    }
+
+    function runServerTest(index, selectedServers) {
+        if (index >= selectedServers.length) {
+            showManualIntro();
+            return;
+        }
+
+        const target = selectedServers[index];
+        const startedAt = Date.now();
+        const testDuration = randomTestDuration();
+        const baseSpeed = 3.5 + Math.random() * 85;
+        const basePing = 18 + Math.random() * 188;
+        let nextStatusAt = 0;
+
+        autoTitle.textContent = index === 0 ? 'Running network speed test' : 'Testing next location';
+        autoCopy.textContent = 'Testing location ' + (index + 1) + ' of 3. Please wait while sponsored media latency is measured.';
+        serverName.textContent = target.name;
+        serverRegion.textContent = target.region;
+        meterFill.style.width = '0%';
+        testTimer.textContent = formatRemaining(testDuration);
+        resetMetricCharts();
+        logLine1.textContent = 'Opening TLS tunnel to ' + target.name + '...';
+        logLine2.textContent = 'Sampling creative asset chunk 0/4096.';
+        logLine3.textContent = 'Calibrating fairness buffer.';
+
+        const ticker = setTicker(() => {
+            const elapsed = Date.now() - startedAt;
+            const progress = Math.min(1, elapsed / testDuration);
+            const wobble = Math.sin(progress * 24) * 0.9 + Math.random() * 1.8;
+            const speed = Math.max(0.12, baseSpeed * (0.22 + progress * 0.84) + wobble);
+            const ping = Math.max(5, basePing - progress * 9 + Math.random() * 12);
+            const jitter = Math.max(0.2, Math.random() * 16 + (1 - progress) * 8);
+            const loss = Math.max(0, Math.random() * 2.4 - progress * 0.9);
+
+            if (elapsed >= nextStatusAt) {
+                activeStatusMessage = pickDifferent(kitbogaStatusMessages, activeStatusMessage);
+                nextStatusAt = elapsed + 1800 + Math.random() * 2400;
+            }
+
+            meterFill.style.width = Math.round(progress * 100) + '%';
+            testTimer.textContent = formatRemaining(testDuration - elapsed);
+            downloadStat.textContent = speed.toFixed(2) + ' Mbps';
+            burstStat.textContent = Math.floor(progress * (2400 + Math.random() * 1200)) + ' kb';
+            pingStat.textContent = Math.round(ping) + ' ms';
+            jitterStat.textContent = jitter.toFixed(1) + ' ms';
+            lossStat.textContent = loss.toFixed(2) + '%';
+            updateMetricCharts(speed, ping, loss);
+            logLine1.textContent = 'Route sample ' + Math.min(4096, Math.floor(progress * 4096)) + '/4096 accepted.';
+            logLine2.textContent = 'Observed ad-quality score: ' + (68 + progress * 21 + Math.random() * 4).toFixed(2);
+            logLine3.textContent = activeStatusMessage;
+
+            if (progress >= 1) {
+                window.clearInterval(ticker);
+                setTimer(() => runServerTest(index + 1, selectedServers), 900);
+            }
+        }, 220);
+    }
+
+    function showManualIntro() {
+        clearTimers();
+        showPanel(manualIntroPanel);
+    }
+
+    function makeStreamText(text) {
+        return String(text || '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .split(' ');
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function makeLoadingPauses(wordCount, pauseBudget) {
+        if (pauseBudget < 2200) return [];
+
+        const pauseCount = Math.min(7, Math.max(2, Math.round(pauseBudget / 14000)));
+        const pauseSlots = [];
+        for (let i = 0; i < pauseCount; i++) {
+            pauseSlots.push(Math.floor(((i + 1) / (pauseCount + 1)) * wordCount + (Math.random() * 18 - 9)));
+        }
+
+        let remainingBudget = pauseBudget;
+            return pauseSlots
+                .map((slot, index) => {
+                    const remainingPauses = pauseCount - index;
+                    const average = remainingBudget / remainingPauses;
+                    const maxForThisPause = remainingBudget - 500 * (remainingPauses - 1);
+                    const duration = remainingPauses === 1
+                        ? Math.max(0, remainingBudget)
+                        : clamp(average * (0.82 + Math.random() * 0.36), 500, maxForThisPause);
+                    remainingBudget -= duration;
+                    return {
+                        wordIndex: Math.max(4, Math.min(wordCount - 3, slot)),
+                    duration
+                };
+            })
+            .sort((a, b) => a.wordIndex - b.wordIndex);
+    }
+
+    function getBaseWordDelay(longestWordCount) {
+        if (longestWordCount > 1200) return 30 + Math.random() * 4;
+        if (longestWordCount > 600) return 44 + Math.random() * 8;
+        if (longestWordCount > 350) return 66 + Math.random() * 10;
+        return 92 + Math.random() * 14;
+    }
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    function startManualTest() {
+        clearTimers();
+        showPanel(manualPanel);
+        manualError.textContent = '';
+        answerSelect.disabled = true;
+        submitAnswer.disabled = true;
+        answerSelect.innerHTML = '<option value="">Waiting for all streams to finish...</option>';
+        streamGrid.innerHTML = '';
+
+        const selectedScripts = shuffle(SCRIPTS).slice(0, 3);
+        const streamPlans = selectedScripts.map((script) => ({
+            script,
+            words: makeStreamText(script.text)
+        }));
+        const longestWordCount = Math.max(...streamPlans.map(plan => plan.words.length));
+        const sharedDuration = longestWordCount * getBaseWordDelay(longestWordCount);
+            const finishOffsets = shuffle([
+                -MANUAL_FINISH_SPREAD_MS / 2,
+                0,
+                MANUAL_FINISH_SPREAD_MS / 2
+            ]);
+        const results = [];
+        let finishedCount = 0;
+
+        streamPlans.forEach((plan, index) => {
+            const script = plan.script;
+            const server = servers[index];
+            const words = plan.words;
+                const jitter = Math.random() * MANUAL_FINISH_JITTER_MS - MANUAL_FINISH_JITTER_MS / 2;
+                const targetDuration = Math.max(9000, sharedDuration + finishOffsets[index] + jitter);
+            const wordDelay = clamp(targetDuration / words.length, 28, 125);
+            const pauseBudget = Math.max(0, targetDuration - words.length * wordDelay);
+            const loadingPauses = makeLoadingPauses(words.length, pauseBudget);
+            let loadingIndex = 0;
+            let pausedUntil = 0;
+            const card = document.createElement('article');
+            card.className = 'server-card rounded-md border border-slate-200 bg-white p-3';
+            card.innerHTML = [
+                '<div>',
+                '<div class="min-w-0">',
+                '<div class="truncate text-sm font-semibold text-slate-900">' + escapeHtml(server.name) + '</div>',
+                '<div class="truncate text-xs text-slate-500">' + escapeHtml(server.region) + '</div>',
+                '</div>',
+                '</div>',
+                '<div class="stream-box mt-3 rounded border border-slate-200 bg-slate-50 p-2 text-xs text-slate-800"></div>',
+                '<div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-200"><div class="h-full rounded-full bg-blue-600" style="width:0%"></div></div>'
+            ].join('');
+            streamGrid.appendChild(card);
+
+            const streamBox = card.querySelector('.stream-box');
+            const progress = card.querySelector('.bg-blue-600');
+            let wordIndex = 0;
+            const startedAt = performance.now();
+            const targetFinishAt = startedAt + targetDuration;
+            card.classList.add('active');
+
+            const interval = setTicker(() => {
+                if (performance.now() < pausedUntil) return;
+
+                const nextPause = loadingPauses[loadingIndex];
+                if (nextPause && wordIndex >= nextPause.wordIndex) {
+                    const loadingLine = document.createElement('span');
+                    loadingLine.className = 'loading-line';
+                    loadingLine.textContent = 'loading...';
+                    streamBox.appendChild(loadingLine);
+                    streamBox.scrollTop = streamBox.scrollHeight;
+                    pausedUntil = performance.now() + nextPause.duration;
+                    loadingIndex++;
+                    return;
+                }
+
+                if (wordIndex === words.length - 1 && performance.now() < targetFinishAt) {
+                    const loadingLine = document.createElement('span');
+                    loadingLine.className = 'loading-line';
+                    loadingLine.textContent = 'loading...';
+                    streamBox.appendChild(loadingLine);
+                    streamBox.scrollTop = streamBox.scrollHeight;
+                    pausedUntil = targetFinishAt;
+                    return;
+                }
+
+                const word = words[wordIndex];
+                if (word) {
+                    const span = document.createElement('span');
+                    span.className = 'word';
+                    span.textContent = word;
+                    streamBox.appendChild(span);
+                    streamBox.scrollTop = streamBox.scrollHeight;
+                }
+
+                wordIndex++;
+                progress.style.width = Math.min(100, Math.round((wordIndex / words.length) * 100)) + '%';
+
+                if (wordIndex >= words.length) {
+                    window.clearInterval(interval);
+                    card.classList.remove('active');
+                    results.push({name: script.name, time: performance.now() - startedAt});
+                    finishedCount++;
+
+                    if (finishedCount === selectedScripts.length) {
+                        fastestScriptName = results.slice().sort((a, b) => a.time - b.time)[0].name;
+                        enableAnswer(selectedScripts);
+                    }
+                }
+            }, wordDelay);
+        });
+    }
+
+    function enableAnswer(selectedScripts) {
+        const options = shuffle(selectedScripts.map(script => script.name).concat(shuffle(decoyAnswers).slice(0, 4)));
+        answerSelect.innerHTML = '<option value="">Select the fastest text...</option>' +
+            options
+                .map(name => '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + '</option>')
+                .join('');
+        answerSelect.disabled = false;
+        submitAnswer.disabled = false;
+    }
+
+    function showCdnConfirmed() {
+        clearTimers();
+        skipConfirmYes.disabled = false;
+        showPanel(cdnConfirmedPanel);
+    }
+
+    function startFakeSkipSubmission() {
+        clearTimers();
+        showPanel(skipLoadingPanel);
+        skipConfirmYes.disabled = true;
+        skipCodeActive = false;
+        skipCodeIndex = 0;
+        skipLoadingCopy.textContent = 'Please wait while a one-time keyboard skip code is generated.';
+
+        const loadingMessages = [
+            'Requesting skip-code entropy from nearest CDN edge...',
+            'Hashing sponsored playback session...',
+            'Reserving keyboard shortcut sequence...',
+            'Binding skip code to this ad impression...'
+        ];
+        let messageIndex = 0;
+
+        setTicker(() => {
+            skipLoadingCopy.textContent = loadingMessages[messageIndex % loadingMessages.length];
+            messageIndex++;
+        }, 2100);
+
+        setTimer(showSkipCodePanel, 10000 + Math.random() * 5000);
+    }
+
+    function showSkipCodePanel() {
+        clearTimers();
+        skipCodeActive = true;
+        skipCodeIndex = 0;
+        showPanel(recordedPanel);
+
+        let remaining = 5;
+        skipCodeProgress.textContent = 'Closing in ' + remaining + '...';
+
+        const countdown = setTicker(() => {
+            remaining--;
+
+            if (remaining > 0) {
+                skipCodeProgress.textContent = 'Closing in ' + remaining + '...';
+                return;
+            }
+
+            window.clearInterval(countdown);
+            closeSkipCodeAlert();
+        }, 1000);
+    }
+
+    function closeSkipCodeAlert() {
+        clearTimers();
+        overlay.classList.remove('visible');
+        sendToParent('setVideoFilter', 'none');
+        sendToParent('play');
+    }
+
+    function normalizeSkipKey(event) {
+        if (event.key === 'b' || event.key === 'B') return 'KeyB';
+        if (event.key === 'a' || event.key === 'A') return 'KeyA';
+        return event.key;
+    }
+
+    function handleSkipCodeKey(event) {
+        if (!skipCodeActive) return;
+
+        const key = normalizeSkipKey(event);
+        if (!skipCodeSequence.includes(key)) return;
+
+        event.preventDefault();
+
+        if (key === skipCodeSequence[skipCodeIndex]) {
+            skipCodeIndex++;
+            if (!recordedPanel.classList.contains('hidden')) {
+                skipCodeProgress.textContent = 'Code accepted: ' + skipCodeIndex + ' / ' + skipCodeSequence.length;
+            }
+
+            if (skipCodeIndex === skipCodeSequence.length) {
+                skipCodeActive = false;
+                clearTimers();
+                if (!recordedPanel.classList.contains('hidden')) {
+                    skipCodeProgress.textContent = 'Skip code accepted. Skipping ad...';
+                }
+                setTimer(adSuccess, 350);
+            }
+            return;
+        }
+
+        skipCodeIndex = key === skipCodeSequence[0] ? 1 : 0;
+        if (!recordedPanel.classList.contains('hidden')) {
+            skipCodeProgress.textContent = skipCodeIndex === 1
+                ? 'Sequence restarted: 1 / ' + skipCodeSequence.length
+                : 'Incorrect key. Sequence reset: 0 / ' + skipCodeSequence.length;
+        }
+    }
+
+    submitAnswer.addEventListener('click', () => {
+        if (!answerSelect.value) return;
+
+        if (answerSelect.value === fastestScriptName) {
+            answerSelect.disabled = true;
+            submitAnswer.disabled = true;
+            setTimer(showCdnConfirmed, 500);
+            return;
+        }
+
+        manualError.className = 'mt-2 min-h-5 text-sm font-semibold text-red-600';
+        manualError.textContent = 'Manual verification failed...retrying automatic CDN selection.';
+        answerSelect.disabled = true;
+        submitAnswer.disabled = true;
+        setTimer(startAutomaticProcess, 1800);
+    });
+
+    beginTest.addEventListener('click', startAutomaticProcess);
+    beginManualTest.addEventListener('click', startManualTest);
+    skipConfirmYes.addEventListener('click', startFakeSkipSubmission);
+    window.addEventListener('keydown', handleSkipCodeKey);
+
+    window.addEventListener('message', (event) => {
         if (!event.data || !event.data.type) return;
 
-        if (event.data.type === 'adStarted') {
-          // Show the skip button when the ad starts
-          skipButton.style.display = 'block';
+        if (event.data.type === 'adStarted' && !flowStarted) {
+            startFlow();
         }
 
-        // By default, if the user doesn't "skip" the ad before the video ends,
-        // we call fail to restart. You're welcome to replace this with a survey
-        // or other interaction instead (see examples/survey).
-        if (event.data.type === 'adFinished') {
-          skipButton.style.display = 'none';
-          window.top.postMessage({ type: 'fail' }, '*');
+        if (event.data.type === 'adFinished' && skipCodeActive) {
+            skipCodeActive = false;
+            adSuccess();
+            return;
         }
-      });
 
-      // Your ad overlay code goes here, we've added a simple example below:
-      skipButton.addEventListener('click', () => {
-        skipButton.style.display = 'none';
-        adSuccess();
-      });
-
-    })(window, document);
-  </script>
+        if (event.data.type === 'adFinished' && flowStarted) {
+            sendToParent('pause');
+        }
+    });
+</script>
 </body>
 </html>
